@@ -1,6 +1,6 @@
 # MySQL Replication with Debezium and Kafka
 
-This guide explains how to set up MySQL replication from Server A to Server B using Debezium and Kafka with Docker Compose, using environment variables for sensitive information.
+This guide explains how to set up MySQL replication from Server A to Server B using Debezium and Kafka with Docker Compose.
 
 ## Prerequisites
 
