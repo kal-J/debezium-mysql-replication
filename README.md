@@ -1,35 +1,4 @@
-### 7. Set Up Schema Synchronization
-
-To periodically capture schema objects (triggers, procedures, and events) from the source database:
-
-1. Make the schema sync scripts executable:
-
-   ```bash
-   chmod +x schema-sync.sh
-   chmod +x schema-sync-cron.sh
-   ```
-
-2. Run the initial schema sync:
-
-   ```bash
-   ./schema-sync.sh
-   ```
-
-3. Set up a scheduled job to run the sync periodically:
-
-   ```bash
-   crontab -e
-   ```
-
-   Add a line like:
-
-   ```
-   0 0 * * * /path/to/schema-sync-cron.sh >> /path/to/schema-sync-cron.log 2>&1
-   ```
-
-   This will sync the schema daily at midnight.
-
-   Note: The script retains the 5 most recent schema syncs and automatically updates the "latest" pointer.# MySQL Replication with Debezium and Kafka (Using Environment Variables)
+# MySQL Replication with Debezium and Kafka (Using Environment Variables)
 
 This guide explains how to set up MySQL replication from Server A to Server B using Debezium and Kafka with Docker Compose, using environment variables for sensitive information.
 
@@ -172,6 +141,43 @@ This guide explains how to set up MySQL replication from Server A to Server B us
 
 2. Check for data replication by comparing data on both servers
 
+
+### 7. Set Up Schema Synchronization
+
+To periodically capture schema objects (triggers, procedures, and events) from the source database:
+
+1. Make the schema sync scripts executable:
+
+   ```bash
+   chmod +x schema-sync.sh
+   chmod +x schema-sync-cron.sh
+   ```
+
+2. Run the initial schema sync:
+
+   ```bash
+   ./schema-sync.sh
+   ```
+
+3. Set up a scheduled job to run the sync periodically:
+
+   ```bash
+   crontab -e
+   ```
+
+   Add a line like:
+
+   ```
+   0 0 * * * /path/to/schema-sync-cron.sh >> /path/to/schema-sync-cron.log 2>&1
+   ```
+
+   This will sync the schema daily at midnight.
+
+   Note: The script retains the 5 most recent schema syncs and automatically updates the "latest" pointer.# MySQL Replication with Debezium and Kafka (Using Environment Variables)
+
+This guide explains how to set up MySQL replication from Server A to Server B using Debezium and Kafka with Docker Compose, using environment variables for sensitive information.
+
+
 ### 8. Promoting Destination to Primary (When Needed)
 
 If you need to promote the destination database to become the primary database:
@@ -190,7 +196,7 @@ If you need to promote the destination database to become the primary database:
 
    This script will:
    - Stop the replication connectors
-   - Import the most recent complete schema with triggers and events (using the latest schema sync)
+   - Import the complete schema with triggers and events
    - Enable the event scheduler
    - Make the destination database ready to be used as the primary database
 
