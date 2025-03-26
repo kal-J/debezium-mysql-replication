@@ -1,0 +1,23 @@
+{
+    "name": "mysql-sink-connector",
+    "config": {
+      "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+      "tasks.max": "1",
+      "topics.regex": "mysql-server-a\\.source_database\\.[^\\.].*",
+      "connection.url": "jdbc:mysql://destination_mysql_host:3306/destination_database",
+      "connection.user": "sink_user",
+      "connection.password": "sink_password",
+      "auto.create": "true",
+      "auto.evolve": "true",
+      "insert.mode": "upsert",
+      "delete.enabled": "true",
+      "pk.mode": "record_key",
+      "pk.fields": "id",
+      "transforms": "unwrap,route",
+      "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+      "transforms.unwrap.drop.tombstones": "false",
+      "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+      "transforms.route.regex": "([^.]+)\\.([^.]+)\\.([^.]+)",
+      "transforms.route.replacement": "$3"
+    }
+  }
