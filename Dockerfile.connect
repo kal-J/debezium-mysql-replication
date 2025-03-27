@@ -1,0 +1,5 @@
+FROM debezium/connect:2.4
+
+# Install MySQL connector and JDBC connector
+RUN confluent-hub install --no-prompt debezium/debezium-connector-mysql:2.4.0 && \
+    confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.7.1

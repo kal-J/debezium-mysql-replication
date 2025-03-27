@@ -62,7 +62,10 @@ services:
 
   # Kafka Connect - Run Debezium connectors
   connect:
-    image: debezium/connect:2.4
+    # image: debezium/connect:2.4
+    build:
+      context: .
+      dockerfile: Dockerfile.connect
     container_name: connect
     depends_on:
       kafka:

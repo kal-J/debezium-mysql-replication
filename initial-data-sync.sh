@@ -47,7 +47,7 @@ mysqldump --host=${SOURCE_MYSQL_HOST} \
   --complete-insert \
   --disable-keys \
   --quick \
-  --compress \
+  --compression-algorithms \
   ${SOURCE_MYSQL_DATABASE} > ./dump/data.sql
 
 echo "Data dump completed."
