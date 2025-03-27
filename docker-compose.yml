@@ -62,10 +62,7 @@ services:
 
   # Kafka Connect - Run Debezium connectors
   connect:
-    # image: debezium/connect:2.4
-    build:
-      context: .
-      dockerfile: Dockerfile.connect
+    image: quay.io/debezium/connect
     container_name: connect
     depends_on:
       kafka:
@@ -84,7 +81,6 @@ services:
       VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
       KEY_CONVERTER_SCHEMAS_ENABLE: "false"
       VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
-      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
     healthcheck:
       test: curl --output /dev/null --silent --head --fail http://connect:8083/ || exit 1
       interval: 10s

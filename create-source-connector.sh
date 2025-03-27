@@ -39,6 +39,7 @@ cat > mysql-source-connector-config.json << EOF
     "database.server.id": "1",
     "database.server.name": "mysql-server-a",
     "database.include": "${SOURCE_MYSQL_DATABASE}",
+    "topic.prefix": "mysql-server-a",
     "database.history.kafka.bootstrap.servers": "kafka:9092",
     "database.history.kafka.topic": "schema-changes.mysql",
     "include.schema.changes": "true",
