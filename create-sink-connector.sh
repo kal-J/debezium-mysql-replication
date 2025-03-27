@@ -19,15 +19,14 @@ cat > mysql-sink-connector-config.json << 'EOF'
     "connection.url": "jdbc:mysql://DEST_MYSQL_HOST:DEST_MYSQL_PORT/DEST_MYSQL_DATABASE",
     "connection.username": "DEST_MYSQL_USER",
     "connection.password": "DEST_MYSQL_PASSWORD",
-    "database.history.kafka.bootstrap.servers": "kafka:9092",
     "insert.mode": "upsert",
     "delete.enabled": "true",
     "primary.key.mode": "record_key",
-    "primary.key.fields": "id",
     "schema.evolution": "basic",
     "table.name.format": "${topic.tail}",
-    "database.time_zone": "UTC",
-    "dialect.name": "MySqlDatabaseDialect"
+    "tombstones.behavior": "delete",
+    "database.timezone": "UTC",
+    "database.dialect": "mysql"
   }
 }
 EOF
@@ -41,6 +40,7 @@ sed -i "s/DEST_MYSQL_USER/${DEST_MYSQL_USER}/g" mysql-sink-connector-config.json
 sed -i "s/DEST_MYSQL_PASSWORD/${DEST_MYSQL_PASSWORD}/g" mysql-sink-connector-config.json
 
 # Deploy the connector
+curl -X DELETE http://localhost:${KAFKA_CONNECT_PORT}/connectors/mysql-sink-connector 2>/dev/null || true
 curl -X POST -H "Content-Type: application/json" --data @mysql-sink-connector-config.json http://localhost:${KAFKA_CONNECT_PORT}/connectors
 
 echo "Sink connector deployed"
