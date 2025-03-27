@@ -1,6 +1,6 @@
-# MySQL Replication with Debezium and Kafka (Using Environment Variables)
+# MySQL Replication with Debezium and Kafka
 
-This guide explains how to set up MySQL replication from Server A to Server B using Debezium and Kafka with Docker Compose, using environment variables for sensitive information.
+This guide explains how to set up MySQL replication from Server A to Server B using Debezium and Kafka with Docker Compose.
 
 ## Prerequisites
 
@@ -174,8 +174,6 @@ To periodically capture schema objects (triggers, procedures, and events) from t
    This will sync the schema daily at midnight.
 
    Note: The script retains the 5 most recent schema syncs and automatically updates the "latest" pointer.# MySQL Replication with Debezium and Kafka (Using Environment Variables)
-
-This guide explains how to set up MySQL replication from Server A to Server B using Debezium and Kafka with Docker Compose, using environment variables for sensitive information.
 
 
 ### 8. Promoting Destination to Primary (When Needed)
