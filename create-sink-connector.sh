@@ -23,10 +23,16 @@ cat > mysql-sink-connector-config.json << 'EOF'
     "delete.enabled": "true",
     "primary.key.mode": "record_key",
     "schema.evolution": "basic",
-    "table.name.format": "${topic.tail}",
+    "table.name.format": "${topic}",
     "tombstones.behavior": "delete",
     "database.timezone": "UTC",
-    "database.dialect": "mysql"
+    "database.dialect": "mysql",
+    "transforms": "route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "mysql-server-a.SOURCE_DATABASE.(.*)",
+    "transforms.route.replacement": "$1",
+    "auto.evolve.allow.non.nullable": "true",
+    "quote.identifiers": "true"
   }
 }
 EOF
@@ -41,6 +47,7 @@ sed -i "s/DEST_MYSQL_PASSWORD/${DEST_MYSQL_PASSWORD}/g" mysql-sink-connector-con
 
 # Deploy the connector
 curl -X DELETE http://localhost:${KAFKA_CONNECT_PORT}/connectors/mysql-sink-connector 2>/dev/null || true
+sleep 2
 curl -X POST -H "Content-Type: application/json" --data @mysql-sink-connector-config.json http://localhost:${KAFKA_CONNECT_PORT}/connectors
 
 echo "Sink connector deployed"
