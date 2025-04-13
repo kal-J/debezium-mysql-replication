@@ -15,7 +15,7 @@ cat > mysql-sink-connector-config.json << 'EOF'
   "config": {
     "connector.class": "io.debezium.connector.jdbc.JdbcSinkConnector",
     "tasks.max": "1",
-    "topics.regex": "mysql-server-a\\.SOURCE_DATABASE\\.[^\\.].*",
+    "topics.regex": "mysql-server-a\\.SOURCE_DATABASE\\.((?!EXCLUDED_TABLES).)*$",
     "connection.url": "jdbc:mysql://DEST_MYSQL_HOST:DEST_MYSQL_PORT/DEST_MYSQL_DATABASE",
     "connection.username": "DEST_MYSQL_USER",
     "connection.password": "DEST_MYSQL_PASSWORD",
@@ -37,6 +37,11 @@ cat > mysql-sink-connector-config.json << 'EOF'
 }
 EOF
 
+# Define tables to exclude (comma-separated with no spaces)
+# Example: TABLES_TO_EXCLUDE="table1|table2|table3"
+# If the variable isn't set in .env, default to an empty exclusion pattern
+TABLES_TO_EXCLUDE=${TABLES_TO_EXCLUDE:-""}
+
 # Replace placeholders with actual values
 sed -i "s/SOURCE_DATABASE/${SOURCE_MYSQL_DATABASE}/g" mysql-sink-connector-config.json
 sed -i "s/DEST_MYSQL_HOST/${DEST_MYSQL_HOST}/g" mysql-sink-connector-config.json
@@ -44,10 +49,11 @@ sed -i "s/DEST_MYSQL_PORT/${DEST_MYSQL_PORT}/g" mysql-sink-connector-config.json
 sed -i "s/DEST_MYSQL_DATABASE/${DEST_MYSQL_DATABASE}/g" mysql-sink-connector-config.json
 sed -i "s/DEST_MYSQL_USER/${DEST_MYSQL_USER}/g" mysql-sink-connector-config.json
 sed -i "s/DEST_MYSQL_PASSWORD/${DEST_MYSQL_PASSWORD}/g" mysql-sink-connector-config.json
+sed -i "s/EXCLUDED_TABLES/${TABLES_TO_EXCLUDE}/g" mysql-sink-connector-config.json
 
 # Deploy the connector
 curl -X DELETE http://localhost:${KAFKA_CONNECT_PORT}/connectors/mysql-sink-connector 2>/dev/null || true
 sleep 2
 curl -X POST -H "Content-Type: application/json" --data @mysql-sink-connector-config.json http://localhost:${KAFKA_CONNECT_PORT}/connectors
 
-echo "Sink connector deployed"
+echo "Sink connector deployed with table exclusions: ${TABLES_TO_EXCLUDE}"
