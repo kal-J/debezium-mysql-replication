@@ -15,7 +15,7 @@ cat > mysql-sink-connector-config.json << 'EOF'
   "config": {
     "connector.class": "io.debezium.connector.jdbc.JdbcSinkConnector",
     "tasks.max": "1",
-    "topics.regex": "mysql-server-a\\.SOURCE_DATABASE\\.((?!EXCLUDED_TABLES).)*$",
+    "topics.regex": "mysql-server-a\\.SOURCE_DATABASE\\..*",
     "connection.url": "jdbc:mysql://DEST_MYSQL_HOST:DEST_MYSQL_PORT/DEST_MYSQL_DATABASE",
     "connection.username": "DEST_MYSQL_USER",
     "connection.password": "DEST_MYSQL_PASSWORD",
@@ -27,10 +27,17 @@ cat > mysql-sink-connector-config.json << 'EOF'
     "tombstones.behavior": "delete",
     "database.timezone": "UTC",
     "database.dialect": "mysql",
-    "transforms": "route",
+    "transforms": "route,dropDeleted",
     "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
     "transforms.route.regex": "mysql-server-a.SOURCE_DATABASE.(.*)",
     "transforms.route.replacement": "$1",
+    "transforms.dropDeleted.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+    "transforms.dropDeleted.blacklist": "__deleted",
+    "errors.tolerance": "all",
+    "errors.retry.timeout": "60000",
+    "errors.retry.delay.max.ms": "5000",
+    "errors.deadletterqueue.topic.name": "dlq-mysql-sink",
+    "errors.deadletterqueue.topic.replication.factor": 1,
     "auto.evolve.allow.non.nullable": "true",
     "quote.identifiers": "true"
   }
@@ -42,6 +49,11 @@ EOF
 # If the variable isn't set in .env, default to an empty exclusion pattern
 TABLES_TO_EXCLUDE=${TABLES_TO_EXCLUDE:-""}
 
+# If there are tables to exclude, modify the topics.regex pattern
+if [ -n "$TABLES_TO_EXCLUDE" ]; then
+  sed -i "s/topics.regex\": \"mysql-server-a\\\\.SOURCE_DATABASE\\\\..*\"/topics.regex\": \"mysql-server-a\\\\.SOURCE_DATABASE\\\\.((?!${TABLES_TO_EXCLUDE}).)*\"/g" mysql-sink-connector-config.json
+fi
+
 # Replace placeholders with actual values
 sed -i "s/SOURCE_DATABASE/${SOURCE_MYSQL_DATABASE}/g" mysql-sink-connector-config.json
 sed -i "s/DEST_MYSQL_HOST/${DEST_MYSQL_HOST}/g" mysql-sink-connector-config.json
@@ -49,7 +61,6 @@ sed -i "s/DEST_MYSQL_PORT/${DEST_MYSQL_PORT}/g" mysql-sink-connector-config.json
 sed -i "s/DEST_MYSQL_DATABASE/${DEST_MYSQL_DATABASE}/g" mysql-sink-connector-config.json
 sed -i "s/DEST_MYSQL_USER/${DEST_MYSQL_USER}/g" mysql-sink-connector-config.json
 sed -i "s/DEST_MYSQL_PASSWORD/${DEST_MYSQL_PASSWORD}/g" mysql-sink-connector-config.json
-sed -i "s/EXCLUDED_TABLES/${TABLES_TO_EXCLUDE}/g" mysql-sink-connector-config.json
 
 # Deploy the connector
 curl -X DELETE http://localhost:${KAFKA_CONNECT_PORT}/connectors/mysql-sink-connector 2>/dev/null || true
