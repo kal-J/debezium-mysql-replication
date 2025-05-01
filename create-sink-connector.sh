@@ -22,10 +22,9 @@ cat > mysql-sink-connector-config.json << EOF
     "connector.class": "io.debezium.connector.jdbc.JdbcSinkConnector",
     "tasks.max": "1",
     "topics.regex": "${TOPICS_REGEX}",
-    "connection.url": "jdbc:mysql://${DEST_MYSQL_HOST}:${DEST_MYSQL_PORT}/${DEST_MYSQL_DATABASE}?autoReconnect=true&useSSL=false&connectTimeout=10000&socketTimeout=30000&tcpKeepAlive=true&testOnBorrow=true&testWhileIdle=true&timeBetweenEvictionRunsMillis=60000&minEvictableIdleTimeMillis=180000",
+    "connection.url": "jdbc:mysql://${DEST_MYSQL_HOST}:${DEST_MYSQL_PORT}/${DEST_MYSQL_DATABASE}?autoReconnect=true&useSSL=false&connectTimeout=10000&socketTimeout=30000&tcpKeepAlive=true&testOnBorrow=true&testWhileIdle=true&timeBetweenEvictionRunsMillis=60000&minEvictableIdleTimeMillis=180000&maxReconnects=10&initialTimeout=10&interactiveClient=true",
     "connection.username": "${DEST_MYSQL_USER}",
-    "connection.username": "DEST_MYSQL_USER",
-    "connection.password": "DEST_MYSQL_PASSWORD",
+    "connection.password": "${DEST_MYSQL_PASSWORD}",
 
     "connection.pool.size": "5",
     "connection.pool.max.idle.time.seconds": "180",
