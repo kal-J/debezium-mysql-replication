@@ -17,6 +17,7 @@ services:
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-log:/var/lib/zookeeper/log
+    restart: on-failure:5
 
   # Kafka - Message broker
   kafka:
@@ -44,7 +45,8 @@ services:
       timeout: 10s
       retries: 5
     volumes:
-      - kafka-data:/var/lib/kafka/data
+      - kafka-data:/var/lib/kafka
+    restart: on-failure:5
 
   # Schema Registry - Manage and validate Kafka message schemas
   schema-registry:
@@ -66,6 +68,7 @@ services:
       retries: 5
     volumes:
       - schema-registry-data:/etc/schema-registry
+    restart: on-failure:5
 
   # Kafka Connect - Run Debezium connectors
   connect:
@@ -92,18 +95,38 @@ services:
       CONFIG_STORAGE_REPLICATION_FACTOR: 1
       OFFSET_STORAGE_REPLICATION_FACTOR: 1
       STATUS_STORAGE_REPLICATION_FACTOR: 1
+      # Enhanced persistence settings
+      CONNECT_CONFIG_STORAGE_PARTITIONS: 1
+      CONNECT_OFFSET_STORAGE_PARTITIONS: 25
+      CONNECT_STATUS_STORAGE_PARTITIONS: 5
+      CONNECT_OFFSET_COMMIT_INTERVAL_MS: 10000
+      CONNECT_OFFSET_COMMIT_TIMEOUT_MS: 5000
+      CONNECT_REST_ADVERTISED_HOST_NAME: "connect"
+      CONNECT_REST_PORT: 8083
+      CONNECT_PLUGIN_PATH: "/kafka/connect,/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_TOPIC_CREATION_ENABLE: "true"
+      CONNECT_ERRORS_TOLERANCE: "all"
+      CONNECT_ERRORS_LOG_ENABLE: "true"
+      CONNECT_ERRORS_LOG_INCLUDE_MESSAGES: "true"
+      CONNECT_SESSION_TIMEOUT_MS: 30000
+      CONNECT_HEARTBEAT_INTERVAL_MS: 3000
       # Recommend setting these to ensure connectors persist
       CONNECT_CONNECT_OFFSETS_COMMIT_INTERVAL_MS: 10000
     healthcheck:
-      test: curl --output /dev/null --silent --head --fail http://connect:8083/ || exit 1
-      interval: 10s
-      timeout: 5s
+      test: |
+        curl --output /dev/null --silent --head --fail http://connect:8083/ && \
+        curl --output /dev/null --silent --head --fail http://connect:8083/connectors
+      interval: 30s
+      timeout: 10s
       retries: 5
+      start_period: 60s
     volumes:
       - connect-data:/kafka/connect
       - connect-plugins:/kafka/connect/plugins
       # Optional: mount a directory for custom connector configurations
-      - ./connect-config:/etc/kafka-connect/connector-config
+      - connect-config:/etc/kafka-connect/connector-config
+      - connect_plugins:/usr/share/confluent-hub-components
+    restart: unless-stopped
 
   # Kafka UI - Optional web UI for Kafka management
   kafka-ui:
@@ -132,3 +155,5 @@ volumes:
   schema-registry-data:
   connect-data:
   connect-plugins:
+  connect-config:
+  connect_plugins:
