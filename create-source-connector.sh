@@ -49,7 +49,8 @@ cat > mysql-source-connector-config.json << EOF
     "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
     "transforms.unwrap.drop.tombstones": "false",
     "transforms.unwrap.delete.handling.mode": "rewrite",
-    "time.precision.mode": "connect"${BINLOG_CONFIG}
+    "time.precision.mode": "connect"${BINLOG_CONFIG},
+    "producer.override.max.request.size": "9097152"
   }
 }
 EOF
