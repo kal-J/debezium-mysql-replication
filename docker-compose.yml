@@ -97,7 +97,7 @@ services:
       VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
        # Set lower config storage cleanup values for better persistence
       CONFIG_STORAGE_REPLICATION_FACTOR: 1
-      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 3
       STATUS_STORAGE_REPLICATION_FACTOR: 1
       # Enhanced persistence settings
       CONNECT_CONFIG_STORAGE_PARTITIONS: 1
@@ -115,7 +115,7 @@ services:
       CONNECT_SESSION_TIMEOUT_MS: 30000
       CONNECT_HEARTBEAT_INTERVAL_MS: 3000
       # Recommend setting these to ensure connectors persist
-      CONNECT_CONNECT_OFFSETS_COMMIT_INTERVAL_MS: 10000
+      CONNECT_CONNECT_OFFSETS_COMMIT_INTERVAL_MS: 30000
       CONNECT_PRODUCER_MAX_REQUEST_SIZE: 9097152
     healthcheck:
       test: |
