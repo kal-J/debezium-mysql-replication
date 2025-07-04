@@ -37,6 +37,7 @@ cat > mysql-sink-connector-config.json << EOF
     "insert.mode": "upsert",
     "delete.enabled": "true",
     "primary.key.mode": "record_key",
+    "pk.mode": "record_key",
     "schema.evolution": "basic",
     "table.name.format": "\${topic}",
     "tombstones.behavior": "delete",

@@ -151,6 +151,47 @@ services:
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: connect
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://connect:8083
+    restart: unless-stopped
+
+  # Kafka Connect Monitor
+  connect-monitor:
+    image: alpine/curl:latest
+    container_name: connect-monitor
+    depends_on:
+      connect:
+        condition: service_healthy
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - CHECK_INTERVAL=60
+    command: >
+      sh -c '
+        apk add --no-cache jq;
+        echo "Starting Kafka Connect Monitor...";
+        while true; do
+          STATUS=$$(curl -s "http://connect:8083/connectors?expand=status");
+          FAILED_CONNECTORS=$$(echo "$$STATUS" | jq -r "to_entries[] | select(.value.status.connector.state != \"RUNNING\") | .key");
+          FAILED_TASKS=$$(echo "$$STATUS" | jq -r "to_entries[] | .key as $$conn | .value.status.tasks[]? | select(.state != \"RUNNING\") | \"Connector ''$$conn'' (Task $$((.id + 1))): *State changed to ''$$(.state)''*.\"");
+          
+          MESSAGE="";
+          if [ -n "$$FAILED_CONNECTORS" ]; then
+            MESSAGE="$$MESSAGE\n:red_circle: *Failed Connectors Detected:*\n$$FAILED_CONNECTORS";
+          fi;
+          if [ -n "$$FAILED_TASKS" ]; then
+            MESSAGE="$$MESSAGE\n:warning: *Failed Tasks Detected:*\n$$FAILED_TASKS";
+          fi;
+
+          if [ -n "$$MESSAGE" ]; then
+            echo "Detected failed components. Sending notification to Slack.";
+            PAYLOAD=$$(jq -n --arg text "$$MESSAGE" "{text: \$$text}");
+            curl -s -X POST -H "Content-type: application/json" --data "$$PAYLOAD" "$$SLACK_WEBHOOK_URL";
+          else
+            echo "[OK] All connectors and tasks are running.";
+          fi;
+          
+          sleep $$CHECK_INTERVAL;
+        done;
+      '
+    restart: unless-stopped
 
 volumes:
   # Persistent volumes for all services

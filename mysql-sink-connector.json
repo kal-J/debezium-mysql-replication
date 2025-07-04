@@ -12,7 +12,6 @@
       "insert.mode": "upsert",
       "delete.enabled": "true",
       "pk.mode": "record_key",
-      "pk.fields": "id",
       "transforms": "unwrap,route",
       "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
       "transforms.unwrap.drop.tombstones": "false",
