@@ -53,6 +53,7 @@ cat > mysql-sink-connector-config.json << EOF
     "errors.retry.timeout": "60000",
     "errors.retry.delay.max.ms": "5000",
     "errors.deadletterqueue.topic.name": "dlq-mysql-sink",
+    "errors.deadletterqueue.context.headers.enable": true,
     "errors.deadletterqueue.topic.replication.factor": 1,
     "errors.log.include.messages": "true",
     "errors.log.enable": "true",
