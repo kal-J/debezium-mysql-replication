@@ -20,15 +20,15 @@ else
   BINLOG_CONFIG=", \"snapshot.mode\": \"${SNAPSHOT_MODE}\""
 fi
 
-# Remove mysql-source-connector-config.json if it exists
-if [ -f "mysql-source-connector-config.json" ]; then
-  rm mysql-source-connector-config.json
+# Remove mysql-cdc-source-connector-config.json if it exists
+if [ -f "mysql-cdc-source-connector-config.json" ]; then
+  rm mysql-cdc-source-connector-config.json
 fi
 
 # Create the connector JSON configuration using environment variables
-cat > mysql-source-connector-config.json << EOF
+cat > mysql-cdc-source-connector-config.json << EOF
 {
-  "name": "mysql-source-connector",
+  "name": "mysql-cdc-source-connector",
   "config": {
     "connector.class": "io.debezium.connector.mysql.MySqlConnector",
     "tasks.max": "1",
@@ -37,18 +37,14 @@ cat > mysql-source-connector-config.json << EOF
     "database.user": "${SOURCE_MYSQL_USER}",
     "database.password": "${SOURCE_MYSQL_PASSWORD}",
     "database.server.id": "1",
-    "database.server.name": "mysql-server-a",
-    "topic.prefix": "mysql-server-a",
+    "database.server.name": "mysql-cdc",
+    "topic.prefix": "mysql-cdc",
     "database.include.list": "${SOURCE_MYSQL_DATABASE}",
     "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
     "schema.history.internal.kafka.topic": "schema-changes.mysql",
     "schema.history.internal.consumer.security.protocol": "PLAINTEXT",
     "schema.history.internal.producer.security.protocol": "PLAINTEXT",
     "include.schema.changes": "true",
-    "transforms": "unwrap",
-    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
-    "transforms.unwrap.drop.tombstones": "false", 
-    "transforms.unwrap.delete.handling.mode": "drop",
     "time.precision.mode": "connect"${BINLOG_CONFIG},
     "producer.override.max.request.size": "9097152"
   }
@@ -56,7 +52,7 @@ cat > mysql-source-connector-config.json << EOF
 EOF
 
 # Deploy the connector
-curl -X DELETE http://localhost:${KAFKA_CONNECT_PORT}/connectors/mysql-source-connector 2>/dev/null || true
-curl -X POST -H "Content-Type: application/json" --data @mysql-source-connector-config.json http://localhost:${KAFKA_CONNECT_PORT}/connectors
+curl -X DELETE http://localhost:${KAFKA_CONNECT_PORT}/connectors/mysql-cdc-source-connector 2>/dev/null || true
+curl -X POST -H "Content-Type: application/json" --data @mysql-cdc-source-connector-config.json http://localhost:${KAFKA_CONNECT_PORT}/connectors
 
 echo "Source connector deployed"

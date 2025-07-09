@@ -16,7 +16,7 @@ services:
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-log:/var/lib/zookeeper/log
-    restart: on-failure:5
+    restart: always
 
   # Kafka - Message broker
   kafka:
@@ -51,7 +51,7 @@ services:
       retries: 5
     volumes:
       - kafka-data:/var/lib/kafka
-    restart: on-failure:5
+    restart: always
 
   # Schema Registry - Manage and validate Kafka message schemas
   schema-registry:
@@ -73,7 +73,7 @@ services:
       retries: 5
     volumes:
       - schema-registry-data:/etc/schema-registry
-    restart: on-failure:5
+    restart: always
 
   # Kafka Connect - Run Debezium connectors
   connect:
@@ -132,7 +132,7 @@ services:
       # Optional: mount a directory for custom connector configurations
       - connect-config:/etc/kafka-connect/connector-config
       - connect_plugins:/usr/share/confluent-hub-components
-    restart: unless-stopped
+    restart: always
 
   # Kafka UI - Optional web UI for Kafka management
   kafka-ui:
@@ -152,7 +152,7 @@ services:
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: connect
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://connect:8083
-    restart: unless-stopped
+    restart: always
 
   # Kafka Connect Monitor
   connect-monitor:
@@ -192,7 +192,7 @@ services:
           sleep $$CHECK_INTERVAL;
         done;
       '
-    restart: unless-stopped
+    restart: always
 
 volumes:
   # Persistent volumes for all services
